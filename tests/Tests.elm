@@ -11,6 +11,7 @@ suite =
         [ toStringTest
         , fromStringTest
         , fromStringFailureTest
+        , valuesTest
         ]
 
 
@@ -87,3 +88,10 @@ fromStringFailureTest =
     Test.test "Bimap.fromString should return Nothing for a String that's not in the Bimap" <|
         \() ->
             Bimap.fromString bimap "Four" |> Expect.equal Nothing
+
+
+valuesTest : Test
+valuesTest =
+    Test.test "Bimap.values should return a List (String, a) of all of its keys and values" <|
+        \() ->
+            Bimap.values bimap |> List.unzip |> Expect.equal ( allStrings, allValues )
