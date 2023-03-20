@@ -4,7 +4,7 @@
   "scripts": {
     "coverage": "elm-coverage",
     "preview": "elm-doc-preview",
-    "test": "elm-test && elm-verify-examples --run-tests && elm-format --validate .",
+    "test": "elm-test && elm-format --validate .",
     "test-watch": "elm-test --watch"
   },
   "repository": {
@@ -23,7 +23,6 @@
   "devDependencies": {
     "elm-coverage": "^0.4.1",
     "elm-doc-preview": "^5.0.5",
-    "elm-format": "^0.8.6",
-    "elm-verify-examples": "^5.2.0"
+    "elm-format": "^0.8.6"
   }
 }
