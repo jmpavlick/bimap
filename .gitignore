@@ -1,0 +1,23 @@
+# elm-package generated files
+elm-stuff
+
+# elm-repl generated files
+repl-temp-*
+
+# stoeffel/elm-verify-examples
+tests/VerifyExamples
+
+# Ignore backup files
+*~
+
+# CI dependency directories
+node_modules/
+
+# IntelliJ files
+.idea/
+
+# elm-coverage reports
+.coverage/
+
+# misc
+.DS_Store
