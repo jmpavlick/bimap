@@ -22,7 +22,7 @@ bimap =
                 No ->
                     no
         )
-        |> Bimap.vairant "Yes" Yes
+        |> Bimap.variant "Yes" Yes
         |> Bimap.variant "No" No
         |> Bimap.build
 
