@@ -1,27 +1,29 @@
 {
   "name": "bimap",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "coverage": "elm-coverage",
+    "preview": "elm-doc-preview",
+    "test": "elm-test && elm-verify-examples --run-tests && elm-format --validate .",
+    "test-watch": "elm-test --watch"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jmpavlick/bimap.git"
   },
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/jmpavlick/bimap/issues"
   },
   "homepage": "https://github.com/jmpavlick/bimap#readme",
   "dependencies": {
     "elm": "^0.19.1-5",
+    "elm-test": "^0.19.1-revision12"
+  },
+  "devDependencies": {
     "elm-coverage": "^0.4.1",
     "elm-doc-preview": "^5.0.5",
     "elm-format": "^0.8.6",
-    "elm-test": "^0.19.1-revision9",
     "elm-verify-examples": "^5.2.0"
   }
 }
