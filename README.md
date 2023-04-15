@@ -27,11 +27,11 @@ bimap =
         |> Bimap.build
 
 
-Bimap.toString Yes --> "Yes"
+Bimap.toString bimap Yes --> "Yes"
 
-Bimap.fromString "No" --> Just No
+Bimap.fromString bimap "No" --> Just No
 
-Bimap.fromString "Maybe" --> Nothing
+Bimap.fromString bimap "Maybe" --> Nothing
 ```
 
 Inspired by [miniBill/elm-codec](https://package.elm-lang.org/packages/miniBill/elm-codec/latest/). Useful whenever you need to map between `String`s and custom types, but JSON values aren't involved.
