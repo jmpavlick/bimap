@@ -3,7 +3,7 @@
     "name": "jmpavlick/bimap",
     "summary": "Elm package for simple bidirectional mapping between Strings and custom types",
     "license": "MIT",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "exposed-modules": [
         "Bimap"
     ],

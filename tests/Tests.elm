@@ -12,6 +12,10 @@ suite =
         , fromStringTest
         , fromStringFailureTest
         , valuesTest
+        , toIndexTest
+        , fromIndexTest
+        , fromIndexFailureTest
+        , compareTest
         ]
 
 
@@ -95,3 +99,43 @@ valuesTest =
     Test.test "Bimap.values should return a List (String, a) of all of its keys and values" <|
         \() ->
             Bimap.values bimap |> List.unzip |> Expect.equal ( allStrings, allValues )
+
+
+toIndexTest : Test
+toIndexTest =
+    Test.test "Bimap.toIndex should return an Int for the index of a value in its collection" <|
+        \() ->
+            Expect.equalLists [ 0, 1, 2 ]
+                [ Bimap.toIndex bimap One
+                , Bimap.toIndex bimap Two
+                , Bimap.toIndex bimap Three
+                ]
+
+
+fromIndexTest : Test
+fromIndexTest =
+    Test.test "Bimap.fromIndex should return a Just a for a custom type element at a valid index" <|
+        \() ->
+            Expect.equalLists [ Just One, Just Two, Just Three ]
+                [ Bimap.fromIndex bimap 0
+                , Bimap.fromIndex bimap 1
+                , Bimap.fromIndex bimap 2
+                ]
+
+
+fromIndexFailureTest : Test
+fromIndexFailureTest =
+    Test.test "Bimap.fromIndex should return a Nothing for an out-of-range index value" <|
+        \() ->
+            Bimap.fromIndex bimap 4 |> Expect.equal Nothing
+
+
+compareTest : Test
+compareTest =
+    Test.test "Bimap.compare should compare two values in its collection and return an Order, based on the custom type's order in the Bimap match function" <|
+        \() ->
+            Expect.equalLists [ LT, EQ, GT ]
+                [ Bimap.compare bimap One Two
+                , Bimap.compare bimap Three Three
+                , Bimap.compare bimap Two One
+                ]

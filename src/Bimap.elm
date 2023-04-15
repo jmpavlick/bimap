@@ -6,9 +6,12 @@ module Bimap exposing
     , fromString
     , toString
     , values
+    , toIndex
+    , fromIndex
+    , compare
     )
 
-{-| Simple bidirectional mapping between Strings and custom types.
+{-| Simple bidirectional mapping between Strings and custom types; sorting and comparison
 
 @docs Bimap
 
@@ -23,6 +26,12 @@ module Bimap exposing
 @docs toString
 
 @docs values
+
+@docs toIndex
+
+@docs fromIndex
+
+@docs compare
 
 -}
 
@@ -200,3 +209,133 @@ fromString (Bimap b) =
 values : Bimap a -> List ( String, a )
 values (Bimap { dict }) =
     OrderedDict.toList dict
+
+
+{-| Returns the `Int` index of a custom type value. Values are indexed in the same order that they were added.
+
+    type Response
+        = Yes
+        | No
+
+
+    bimap : Bimap Response
+    bimap =
+        Bimap.init
+            (\yes no value ->
+                case value of
+                    Yes ->
+                        yes
+
+                    No ->
+                        no
+            )
+            |> Bimap.variant "Yes" Yes
+            |> Bimap.variant "No" No
+            |> Bimap.build
+
+    Bimap.toIndex bimap Yes -- 0
+    Bimap.toIndex bimap No -- 1
+
+-}
+toIndex : Bimap a -> a -> Int
+toIndex (Bimap { dict }) value =
+    toIndexRec (OrderedDict.values dict) value 0
+
+
+toIndexRec : List a -> a -> Int -> Int
+toIndexRec all value countAccumulator =
+    case all of
+        [] ->
+            countAccumulator
+
+        x :: xs ->
+            if x == value then
+                countAccumulator
+
+            else
+                toIndexRec xs value (countAccumulator + 1)
+
+
+{-| Returns `Just a` for a custom type value at a given `Int` index, if one exists; `Nothing` otherwise. Values are indexed in the same order that they were added.
+
+    type Response
+        = Yes
+        | No
+
+
+    bimap : Bimap Response
+    bimap =
+        Bimap.init
+            (\yes no value ->
+                case value of
+                    Yes ->
+                        yes
+
+                    No ->
+                        no
+            )
+            |> Bimap.variant "Yes" Yes
+            |> Bimap.variant "No" No
+            |> Bimap.build
+
+    Bimap.fromIndex bimap 0 -- Just Yes
+    Bimap.fromIndex bimap 1 -- Just No
+    Bimap.fromIndex bimap 2 -- Nothing
+
+-}
+fromIndex : Bimap a -> Int -> Maybe a
+fromIndex (Bimap { dict }) index =
+    if index < 0 then
+        Nothing
+
+    else
+        fromIndexRec (OrderedDict.values dict) index 0
+
+
+fromIndexRec : List a -> Int -> Int -> Maybe a
+fromIndexRec all index countAccumulator =
+    case all of
+        [] ->
+            Nothing
+
+        x :: xs ->
+            if index == countAccumulator then
+                Just x
+
+            else
+                fromIndexRec xs index (countAccumulator + 1)
+
+
+{-| Compares two custom type values in a `Bimap`. Very useful for sorting when partially applied and passed to [`List.sortWith`](https://package.elm-lang.org/packages/elm/core/latest/List#sortWith).
+
+    type Response
+        = Yes
+        | No
+
+
+    bimap : Bimap Response
+    bimap =
+        Bimap.init
+            (\yes no value ->
+                case value of
+                    Yes ->
+                        yes
+
+                    No ->
+                        no
+            )
+            |> Bimap.variant "Yes" Yes
+            |> Bimap.variant "No" No
+            |> Bimap.build
+
+    sort : List Response -> List Response
+    sort =
+        List.sortWith (Bimap.compare bimap)
+
+
+    sort [ No, Yes ] -- [ Yes, No ]
+
+-}
+compare : Bimap a -> a -> a -> Order
+compare bimap a b =
+    Basics.compare (toIndex bimap a) (toIndex bimap b)
