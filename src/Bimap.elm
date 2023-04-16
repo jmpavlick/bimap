@@ -13,7 +13,7 @@ module Bimap exposing
     , encoder
     )
 
-{-| Simple bidirectional mapping between Strings and custom types; sorting and comparison; JSON encoding and decoding
+{-| Bidirectional mapping/comparison/JSON (en,de)coding between Strings and types.
 
 @docs Bimap
 
