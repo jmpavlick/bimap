@@ -4,6 +4,12 @@ This package provides a type-safe data structure and helper functions for mappin
 
 Think of it as sugar around the general idea of an "enum" in other languages.
 
+Supports:
+
+* Mapping between custom types and `String`s
+* Comparison operators (for sorting)
+* JSON encoders and decoders for custom type values
+
 ```
 import Bimap exposing (Bimap)
 
