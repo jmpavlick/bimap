@@ -1,22 +1,11 @@
-module Tests exposing (suite)
+module Tests exposing (..)
 
 import Bimap exposing (Bimap)
 import Expect
+import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
 import Test exposing (Test)
-
-
-suite : Test
-suite =
-    Test.describe "Bimap tests"
-        [ toStringTest
-        , fromStringTest
-        , fromStringFailureTest
-        , valuesTest
-        , toIndexTest
-        , fromIndexTest
-        , fromIndexFailureTest
-        , compareTest
-        ]
+import Test.Runner exposing (Runner)
 
 
 type Number
@@ -139,3 +128,50 @@ compareTest =
                 , Bimap.compare bimap Three Three
                 , Bimap.compare bimap Two One
                 ]
+
+
+decoderTest : Test
+decoderTest =
+    let
+        decoder : Decoder Number
+        decoder =
+            Bimap.decoder bimap
+
+        jsonDecoder : Decoder Number
+        jsonDecoder =
+            Decode.field "number" decoder
+
+        run : String -> Result Decode.Error Number
+        run =
+            Decode.decodeString jsonDecoder
+    in
+    Test.describe "Bimap.decoder should generate a decoder based on a Bimap"
+        [ Test.test "A valid JSON value should be decoded correctly" <|
+            \() ->
+                run """{ "number": "One" }""" |> Expect.equal (Ok One)
+        , Test.test "An invalid JSON value should return the correct failure message" <|
+            \() ->
+                let
+                    errorMessage : String
+                    errorMessage =
+                        "Problem with the value at json.number:\n\n    \"Six\"\n\nDecode failed; Six is not a valid value. Expected one of: One; Two; Three"
+                in
+                case run """{ "number": "Six" }""" of
+                    Ok _ ->
+                        Expect.fail "decoding this value should fail!"
+
+                    Err e ->
+                        Decode.errorToString e |> Expect.equal errorMessage
+        ]
+
+
+encoderTest : Test
+encoderTest =
+    Test.test "Bimap.encoder should generate a valid JSON encoder based on a Bimap" <|
+        \() ->
+            let
+                encoder : Number -> Encode.Value
+                encoder =
+                    Bimap.encoder bimap
+            in
+            Encode.encode 0 (encoder Two) |> Expect.equal "\"Two\""

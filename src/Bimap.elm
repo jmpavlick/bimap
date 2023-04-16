@@ -9,9 +9,11 @@ module Bimap exposing
     , toIndex
     , fromIndex
     , compare
+    , decoder
+    , encoder
     )
 
-{-| Simple bidirectional mapping between Strings and custom types; sorting and comparison
+{-| Simple bidirectional mapping between Strings and custom types; sorting and comparison; JSON encoding and decoding
 
 @docs Bimap
 
@@ -33,8 +35,14 @@ module Bimap exposing
 
 @docs compare
 
+@docs decoder
+
+@docs encoder
+
 -}
 
+import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
 import OrderedDict exposing (OrderedDict)
 
 
@@ -339,3 +347,107 @@ fromIndexRec all index countAccumulator =
 compare : Bimap a -> a -> a -> Order
 compare bimap a b =
     Basics.compare (toIndex bimap a) (toIndex bimap b)
+
+
+{-| Decoder for a custom type value in a `Bimap`.
+
+    import Json.Decode as Decode exposing (Decoder)
+
+    type Response
+        = Yes
+        | No
+
+
+    bimap : Bimap Response
+    bimap =
+        Bimap.init
+            (\yes no value ->
+                case value of
+                    Yes ->
+                        yes
+
+                    No ->
+                        no
+            )
+            |> Bimap.variant "Yes" Yes
+            |> Bimap.variant "No" No
+            |> Bimap.build
+
+    decoder : Decoder Response
+    decoder =
+        Bimap.decoder bimap
+
+    okJson : String
+    okJson =
+        """{ "response": "Yes" }"""
+
+    badJson : String
+    badJson =
+        """{ "response": "Maybe" }"""
+
+    jsonDecoder : Decoder Response
+    jsonDecoder =
+        Decode.field "response" decoder
+
+    Decode.decodeString jsonDecoder okJson -- Ok Yes
+    Decode.decodeString jsonDecoder badJson -- Err (Field "number" (Failure "Decode failed; Six is not a valid value. Expected one of: One; Two; Three" <internals>))
+
+
+    sort [ No, Yes ] -- [ Yes, No ]
+
+-}
+decoder : Bimap a -> Decoder a
+decoder bimap =
+    Decode.andThen
+        (\value ->
+            fromString bimap value
+                |> Maybe.map Decode.succeed
+                |> Maybe.withDefault
+                    (Decode.fail
+                        (String.join " "
+                            [ "Decode failed;"
+                            , value
+                            , "is not a valid value. Expected one of:"
+                            , String.join "; " (values bimap |> List.map Tuple.first)
+                            ]
+                        )
+                    )
+        )
+        Decode.string
+
+
+{-| Encoder for a custom type value in a `Bimap`.
+
+    import Json.Encode as Encode
+
+    type Response
+        = Yes
+        | No
+
+
+    bimap : Bimap Response
+    bimap =
+        Bimap.init
+            (\yes no value ->
+                case value of
+                    Yes ->
+                        yes
+
+                    No ->
+                        no
+            )
+            |> Bimap.variant "Yes" Yes
+            |> Bimap.variant "No" No
+            |> Bimap.build
+
+
+    encoder : Response -> Encode.Value
+    encoder =
+        Bimap.encoder bimap
+
+    Encoder.encode 0 (encoder Yes) -- "\"Yes\""
+
+-}
+encoder : Bimap a -> a -> Encode.Value
+encoder bimap value =
+    toString bimap value |> Encode.string
